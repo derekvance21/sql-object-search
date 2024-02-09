@@ -122,7 +122,10 @@ export function activate(context: vscode.ExtensionContext) {
                 if (result && result.rowCount > 0) {
                     const definition = result.rows[0][definitionIndex].displayValue;
                     const queryDocument = await azdata.queryeditor.openQueryDocument({ content: definition });
-                    queryDocument.connect(connection);
+                    if (definition.length === 65535) {
+                        vscode.window.showWarningMessage(`The object definition for ${schema}.${name} has likely been truncated!`);
+                    }
+                    await queryDocument.connect(connection);
                 }
             }
         }
@@ -153,8 +156,10 @@ export function activate(context: vscode.ExtensionContext) {
                     })
                     .then(result => {
                         if (result && result.rowCount > 0) {
-                            const definitionIndex = 2;
-                            const definition = result.rows[0][definitionIndex].displayValue;
+                            const [schema, name, definition, type] = result.rows[0].map(v => v.displayValue);
+                            if (definition.length === 65535) {
+                                vscode.window.showWarningMessage(`The object definition for ${schema}.${name} has likely been truncated!`);
+                            }
                             return azdata.queryeditor.openQueryDocument({ content: definition });
                         } else {
                             vscode.window.showErrorMessage('No definition found');
