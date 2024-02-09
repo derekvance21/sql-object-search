@@ -48,6 +48,13 @@ export function activate(context: vscode.ExtensionContext) {
         return input.replace("'", escapeChar);
     };
 
+    /*
+    I could also write this query as:
+    ```sql
+    SELECT OBJECT_DEFINITION(object_id)
+    FROM sys.objects
+    ```
+    */
     const objectDefinitionQuery = (schema: string, name: string) => {
         return `
             SELECT TOP 1 SCHEMA_NAME(obj.schema_id), obj.name, definition, obj.type
